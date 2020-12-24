@@ -1,0 +1,52 @@
+language: go
+go:
+  - "1.15"
+env:
+  - GO111MODULE=on
+install:
+  - go mod download
+  
+
+stages:
+- lint
+- test
+- build dev docker image
+- build latest docker image
+- build tagged docker image
+
+jobs:
+    
+    include:
+        - stage: lint
+          script: 
+            - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.33.0
+            - golangci-lint --version
+            - make lint
+        - stage: test
+          script: 
+            - make test
+
+        # Publish dev image on docker hub
+        - stage: build dev docker image
+          if: 
+            - branch != "main" AND NOT tag IS present
+          script:
+          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          - make push_docker_dev
+
+        # Publish latest image on docker hub [MAIN ONLY]
+        - stage: build latest docker image
+          if: 
+            - NOT tag IS present AND branch = "main"
+          script:
+          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          - make push_docker_latest
+    
+        # Publish tagged image on docker hub 
+        - stage: build tagged docker image
+          if: 
+            - tag IS present
+          script:
+          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          - docker build --tag massicer/oh-my-gate-iot-executor:${TRAVIS_TAG} .
+          - docker push massicer/oh-my-gate-iot-executor:${TRAVIS_TAG}
