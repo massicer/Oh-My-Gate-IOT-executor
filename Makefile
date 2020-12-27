@@ -10,8 +10,17 @@ test:
 start:
 	go run ./cmd/main.go
 
+up:
+	docker-compose up --build
+
+logs:
+	docker-compose logs -f 
+
 build-local:
 	go build ./cmd/main.go
+
+down:
+	docker-compose down
 
 all: lint test build-local
 
