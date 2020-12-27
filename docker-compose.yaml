@@ -1,0 +1,9 @@
+services:
+  iot-executor:
+    image: massicer/oh-my-gate-iot-executor:compose
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./secrets:/secrets
+    env_file: .env
