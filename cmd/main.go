@@ -4,17 +4,26 @@ import (
 	"os"
 	"time"
 	"strconv"
+	"github.com/massicer/Oh-My-Gate-IOT-executor/internal/iot_adapter"
 	"github.com/massicer/Oh-My-Gate-IOT-executor/internal/logger"
 	"github.com/massicer/Oh-My-Gate-IOT-executor/internal/message_broker"
+	"github.com/massicer/Oh-My-Gate-IOT-executor/internal/handler"
 )
 
 func main() {
 	var logger logger.Logger = logger.Create_logger("iot-executor")
 	logger.Info("Preparing to start...")
 
+	logger.Info("Going to setup iot-adapter")
+	var adapter = iot_adapter.Sdout_iot_adapter{W: os.Stdout}
+	logger.Info("Iot adapter configured")
+
+	logger.Info("Going to setup handler")
+	var handler = setup_handler(logger, &adapter)
+	logger.Info("Handler configured")
 	
 	logger.Info("Going to setup_broker...")
-	err, broker := setup_broker(logger)
+	err, broker := setup_broker(logger, handler)
 	handle_error(logger, err)
 	logger.Info("Broker created")
 
@@ -22,6 +31,7 @@ func main() {
 	err = broker.Start()
 	handle_error(logger, err)
 	logger.Info("Listening started")
+	
 	
 	
 }
@@ -32,8 +42,15 @@ func handle_error(logger logger.Logger, err error){
 	}
 }
 
+func setup_handler(logger logger.Logger, adapter iot_adapter.Iot_adapter) *handler.BaseHandler {
+	return &handler.BaseHandler{
+		Adapter: adapter,
+		Logger: logger,
+	}
+}
 
-func setup_broker(logger logger.Logger) (error, *message_broker.Broker){
+
+func setup_broker(logger logger.Logger, handler *handler.BaseHandler) (error, *message_broker.Broker){
 
 	var ack_in_seconds, err = strconv.ParseInt(
 		os.Getenv("ACK_TIME_IN_SECONDS"), 10, 64,
@@ -54,6 +71,7 @@ func setup_broker(logger logger.Logger) (error, *message_broker.Broker){
 	var broker = message_broker.Broker{
 		Config: broker_config,
 		Logger: logger,
+		Handler: handler,
 	}
 
 	return nil, &broker
