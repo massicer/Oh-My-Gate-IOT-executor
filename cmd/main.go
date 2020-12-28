@@ -14,12 +14,14 @@ func main() {
 	var logger logger.Logger = logger.Create_logger("iot-executor")
 	logger.Info("Preparing to start...")
 
-	logger.Info("Going to setup iot-adapter")
-	var adapter = iot_adapter.Sdout_iot_adapter{W: os.Stdout}
+	var adapter_type = os.Getenv("ADAPTER_TYPE")
+	logger.InfoF("Going to setup iot-adapter of type: %s", adapter_type)
+	var adapter, error = iot_adapter.GetAdapter(adapter_type)
+	handle_error(logger, error)
 	logger.Info("Iot adapter configured")
 
 	logger.Info("Going to setup handler")
-	var handler = setup_handler(logger, &adapter)
+	var handler = setup_handler(logger, adapter)
 	logger.Info("Handler configured")
 	
 	logger.Info("Going to setup_broker...")

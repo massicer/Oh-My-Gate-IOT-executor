@@ -16,6 +16,12 @@ The subscription absence is handled.
 }
 ```
 
+## Available IOT adapters
+This service is able to support the following adapters:
+- `Standard out`: simply prints msg to standard_out. 
+- `gpio`: interacts with a gpio board (example: Raspberry Pi)
+The adapter can be configured using the environment variable: `ADAPTER_TYPE`
+
 ### Envs needed
 
 - `GOOGLE_APPLICATION_CREDENTIALS`: Path where gcp service account is placed. [Here](https://cloud.google.com/iam/docs/creating-managing-service-accounts) you can find a way to create it.
@@ -27,6 +33,10 @@ The subscription absence is handled.
 - `TOPIC_NAME`: Name of the topic to use to listen for msgs.
 
 - `ACK_TIME_IN_SECONDS`: Ack time to use in seconds by msg broker
+
+- `ADAPTER_TYPE`: Adapter type to use to handle messages. Available values are:
+    - `standard_out`
+    - `gpio`
 
 
 
