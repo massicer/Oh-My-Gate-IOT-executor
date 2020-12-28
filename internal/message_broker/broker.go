@@ -6,6 +6,7 @@ import (
 	"context"
 	"time"
 	"github.com/massicer/Oh-My-Gate-IOT-executor/internal/logger"
+	"github.com/massicer/Oh-My-Gate-IOT-executor/internal/handler"
 )
 
 
@@ -16,14 +17,13 @@ type BrokerConfig struct {
 	Project_id string `json:"project_id"`
 }
 
-type HandleMessage interface {
-	handle(message map[string]string) error
-}
+
 
 type Broker struct {
 	Config BrokerConfig
 	subscription *pubsub.Subscription
 	Logger logger.Logger
+	Handler handler.Handler
 }
 
 type MessageBroker interface {
@@ -72,6 +72,7 @@ func (b *Broker) Start() error {
 	b.Logger.Info("Preparing to start listening")
 	err = b.subscription.Receive(context.Background(), func(ctx context.Context, m *pubsub.Message) {
 		b.Logger.Infof("Got message: %s", m.Data)
+		_ = b.Handler.Handle(m.Data)
 		m.Ack()
 	})
 	if err != nil {

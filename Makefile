@@ -45,3 +45,6 @@ build_docker_latest:
 .PHONY: push_docker_latest
 push_docker_latest: build_docker_latest
 	docker push massicer/oh-my-gate-iot-executor:latest
+
+export_env_variables:
+	export $(grep -v '^#' .env | xargs)

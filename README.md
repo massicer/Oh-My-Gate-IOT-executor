@@ -8,22 +8,26 @@ Receive msg related to IOT actions to be executed via google [Pub/Sub](https://c
 This service doesn't create a topic if not exists. Please be sure to create it in GCP. 
 The subscription absence is handled.
 
-## Envs needed
+## Expected message shape
+```
+{
+	"action": "Open",
+	"id": 2
+}
+```
 
-#### GOOGLE_APPLICATION_CREDENTIALS
-Path where gcp service account is placed. [Here](https://cloud.google.com/iam/docs/creating-managing-service-accounts) you can find a way to create it.
+### Envs needed
 
-#### GCP_PROJECT_ID
-Name of project id.
+- `GOOGLE_APPLICATION_CREDENTIALS`: Path where gcp service account is placed. [Here](https://cloud.google.com/iam/docs/creating-managing-service-accounts) you can find a way to create it.
 
-#### SUBSCRIPTION_NAME
-Name of the subscription to use to listen for msgs.
+- `GCP_PROJECT_ID`: Name of project id.
 
-#### TOPIC_NAME
-Name of the topic to use to listen for msgs.
+- `SUBSCRIPTION_NAME`: Name of the subscription to use to listen for msgs.
 
-#### ACK_TIME_IN_SECONDS
-Ack time to use in secods by msg broker
+- `TOPIC_NAME`: Name of the topic to use to listen for msgs.
+
+- `ACK_TIME_IN_SECONDS`: Ack time to use in seconds by msg broker
+
 
 
 ---
@@ -35,7 +39,7 @@ This repo has a set of pipeline in order to produce artifacts in an automatic wa
 - on tag an image with `tag-name` is published
 
 
-### How to release
+### How to release a new service version
 - `git checkout master`
 - `git tag {your tag}`
 - `git push --follow-tags`
