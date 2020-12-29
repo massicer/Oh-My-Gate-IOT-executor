@@ -1,52 +1,19 @@
-language: go
-go:
-  - "1.15"
+dist: xenial
+sudo: required
 env:
-  - GO111MODULE=on
+  global:
+    - DOCKER_REPO=massicer/oh-my-gate-iot-executor
+before_install:
+  - curl -fsSL https://get.docker.com | sh
+  - echo '{"experimental":"enabled"}' | sudo tee /etc/docker/daemon.json
+  - mkdir -p $HOME/.docker
+  - echo '{"experimental":"enabled"}' | sudo tee $HOME/.docker/config.json
+  - sudo service docker start
 install:
-  - go mod download
-  
+  - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+  - docker buildx create --name xbuilder --use
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin	
 
-stages:
-- lint
-- test
-- build dev docker image
-- build latest docker image
-- build tagged docker image
+script:
+  - docker buildx build --progress plain --platform=linux/amd64,linux/386,linux/arm64,linux/arm/v7,linux/arm/v6,linux/ppc64le,linux/s390x -t massicer/oh-my-gate-iot-executor:test .
 
-jobs:
-    
-    include:
-        - stage: lint
-          script: 
-            - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.33.0
-            - golangci-lint --version
-            - make lint
-        - stage: test
-          script: 
-            - make test
-
-        # Publish dev image on docker hub
-        - stage: build dev docker image
-          if: 
-            - branch != "main" AND NOT tag IS present
-          script:
-          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          - make push_docker_dev
-
-        # Publish latest image on docker hub [MAIN ONLY]
-        - stage: build latest docker image
-          if: 
-            - NOT tag IS present AND branch = "main"
-          script:
-          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          - make push_docker_latest
-    
-        # Publish tagged image on docker hub 
-        - stage: build tagged docker image
-          if: 
-            - tag IS present
-          script:
-          - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          - docker build --tag massicer/oh-my-gate-iot-executor:${TRAVIS_TAG} .
-          - docker push massicer/oh-my-gate-iot-executor:${TRAVIS_TAG}

@@ -36,6 +36,15 @@ build_docker_dev:
 push_docker_dev: build_docker_dev
 	docker push massicer/oh-my-gate-iot-executor:dev
 
+# ARM-DEV
+.PHONY: build_arm_docker_dev
+build_arm_docker_dev:
+	docker build --tag massicer/oh-my-gate-iot-executor:arm-dev .
+
+.PHONY: push_arm_docker_dev
+push_arm_docker_dev: build_arm_docker_dev
+	docker push massicer/oh-my-gate-iot-executor:arm-dev 
+
 
 # LATEST
 .PHONY: build_docker_latest
@@ -48,3 +57,11 @@ push_docker_latest: build_docker_latest
 
 export_env_variables:
 	export $(grep -v '^#' .env | xargs)
+
+
+	docker buildx build \
+     	--progress plain \
+		--platform=linux/arm/v7 \
+		-t massicer/oh-my-gate-iot-executor:arm-dev \
+		--push \
+		.

@@ -1,11 +1,8 @@
 # Dockerfile References: https://docs.docker.com/engine/reference/builder/
 
-FROM golang:1.15.6
+FROM golang:1.15
 
-ENV GO111MODULE=on \
-    CGO_ENABLED=0 \
-    GOOS=linux \
-    GOARCH=amd64
+ENV GO111MODULE=on
 
 LABEL maintainer="Massimiliano Ceriani <massimilianoceriani08@gmail.com>"
 
