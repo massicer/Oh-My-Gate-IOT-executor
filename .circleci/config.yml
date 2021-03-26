@@ -1,0 +1,152 @@
+version: 2
+jobs:
+  lint:
+    docker:
+      - image: massicer/golang_ci:latest
+    steps:
+      - checkout
+      - run:
+          name: perform lint step
+          command: |
+            make lint
+
+  test:
+    docker:
+      - image: massicer/golang_ci:latest
+    steps:
+      - checkout
+      - run:
+          name: perform test step
+          command: |
+            make test
+      - run:
+          name: gathering test coverage
+          command: |
+            make test-coverage
+
+  build_and_push_dev:
+    environment:
+      IMAGE_TAG: dev
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: login docker hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - run:
+          name: Build Docker image
+          command: make push_docker
+
+  build_and_push_latest:
+    environment:
+      IMAGE_TAG: latest
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: login docker hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - run:
+          name: Build Docker image
+          command: make push_docker
+
+  build_and_push_tagged:
+    environment:
+      IMAGE_TAG: ${CIRCLE_TAG}
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: login docker hub
+          command: |
+            echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      - run:
+          name: Build Docker image
+          command: make push_docker
+
+workflows:
+  version: 2
+  build-dev:
+    jobs:
+      - lint:
+          filters:
+              branches:
+                ignore:
+                  - main
+                  - master
+      - test:
+          requires:
+              - lint
+          filters:
+            branches:
+              ignore:
+                - main
+                - master
+      - build_and_push_dev:
+          filters:
+            branches:
+              ignore:
+                - main
+                - master
+
+  build-latest:
+    jobs:
+      - lint:
+          filters:
+            branches:
+              only:
+                - main
+                - master/
+      - test:
+          requires:
+            - lint
+          filters:
+            branches:
+              only:
+                - main
+                - master
+      - build_and_push_latest:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - main
+                - master
+
+  build-tagged:
+    jobs:
+      - lint:
+          filters:
+            # ignore any commit on any branch by default since filter are in or
+            branches:
+              ignore: /.*/
+            tags:
+              only: /
+      - test:
+          requires:
+            - lint
+          filters:
+            # ignore any commit on any branch by default since filter are in or
+            branches:
+              ignore: /.*/
+            tags:
+              only: /
+
+      - build_and_push_tagged:
+          requires:
+            - test
+          filters:
+            # ignore any commit on any branch by default since filter are in or
+            branches:
+              ignore: /.*/
+            tags:
+              only: /.*/
