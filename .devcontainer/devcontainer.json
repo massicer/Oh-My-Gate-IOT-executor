@@ -1,5 +1,12 @@
 {
-    "image": "massicer/golang_ci:latest",
+    "build": {
+        "dockerfile": "Dockerfile",
+    },
+    "runArgs": [
+        "--env-file",
+        ".env"
+    ],
+    "context": "..",
     "extensions": [
         "eamodio.gitlens",
         "grimmer.vscode-back-forward-button",

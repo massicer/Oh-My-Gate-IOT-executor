@@ -1,6 +1,6 @@
 # Dockerfile References: https://docs.docker.com/engine/reference/builder/
 
-FROM golang:1.15.6
+FROM massicer/golang_ci:latest
 
 ENV GO111MODULE=on \
     CGO_ENABLED=0 \
@@ -25,4 +25,4 @@ WORKDIR /dist
 
 RUN cp /app/main .
 
-CMD ["/dist/main"]
+ENTRYPOINT ["./main"]

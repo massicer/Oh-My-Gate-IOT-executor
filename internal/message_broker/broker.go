@@ -18,7 +18,6 @@ type BrokerConfig struct {
 }
 
 
-
 type Broker struct {
 	Config BrokerConfig
 	subscription *pubsub.Subscription
