@@ -7,3 +7,5 @@ services:
     volumes:
       - ./secrets:/secrets
     env_file: .env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/secrets/my-gate-key.json
