@@ -1,4 +1,5 @@
 BUILDX_PLATFORMS = linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
+REPO_IMAGE = massicer/oh-my-gate-iot-executor
 
 .PHONY: lint
 lint:
@@ -37,18 +38,17 @@ all: lint test build-local
 
 .PHONY: package_docker
 package_docker:
-	docker build --tag massicer/oh-my-gate-iot-executor:${IMAGE_TAG} .
+	docker build --tag ${REPO_IMAGE}:${IMAGE_TAG} .
 
 
 .PHONY: push_docker
 push_docker: package_docker
-	docker push massicer/oh-my-gate-iot-executor:${IMAGE_TAG}
+	docker push ${REPO_IMAGE}:${IMAGE_TAG}
 
-.PHONY: cross-build
-cross-build:
-	docker context create remotecontext
-	@docker buildx create --name mybuilder --use
-	@docker buildx build --platform ${BUILDX_PLATFORMS} -t ${PROD_IMAGE} --push ./app
+.PHONY: cross_build
+cross_build:
+	# detailed guide here: https://circleci.com/blog/building-docker-images-for-multiple-os-architectures/
+	@docker buildx build --platform ${BUILDX_PLATFORMS} -t ${REPO_IMAGE}:${IMAGE_TAG} --push .
 
 .PHONY: export_env_variables
 export_env_variables:

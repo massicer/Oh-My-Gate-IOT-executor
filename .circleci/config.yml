@@ -9,7 +9,6 @@ jobs:
           name: perform lint step
           command: |
             make lint
-
   test:
     docker:
       - image: massicer/golang_ci:latest
@@ -23,40 +22,22 @@ jobs:
           name: gathering test coverage
           command: |
             make test-coverage
-
   build_and_push_dev:
     environment:
       IMAGE_TAG: dev
-      DOCKER_BUILDKIT: 1
-    machine:
-      image: ubuntu-1604:202007-01
+    docker:
+      - image: circleci/buildpack-deps:stretch
     steps:
       - checkout
+      - setup_remote_docker
       - run:
           name: login docker hub
           command: |
             echo "$DOCKERHUB_PASS" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - run:
-          name: Install buildx
-          command: |
-            BUILDX_BINARY_URL="https://github.com/docker/buildx/releases/download/v0.4.2/buildx-v0.4.2.linux-amd64"
+          name: Build Docker image
+          command: make push_docker
 
-            curl --output docker-buildx \
-              --silent --show-error --location --fail --retry 3 \
-              "$BUILDX_BINARY_URL"
-
-            mkdir -p ~/.docker/cli-plugins
-
-            mv docker-buildx ~/.docker/cli-plugins/
-            chmod a+x ~/.docker/cli-plugins/docker-buildx
-
-            docker buildx install
-            # Run binfmt
-            docker run --rm --privileged tonistiigi/binfmt:latest --install "$BUILDX_PLATFORMS"
-      - run:
-          name: Build multi architectures
-          command: |
-            make cross-build
   build_and_push_latest:
     environment:
       IMAGE_TAG: latest
