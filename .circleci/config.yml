@@ -9,7 +9,6 @@ jobs:
           name: perform lint step
           command: |
             make lint
-
   test:
     docker:
       - image: massicer/golang_ci:latest
@@ -23,7 +22,6 @@ jobs:
           name: gathering test coverage
           command: |
             make test-coverage
-
   build_and_push_dev:
     environment:
       IMAGE_TAG: dev
@@ -78,13 +76,13 @@ workflows:
     jobs:
       - lint:
           filters:
-              branches:
-                ignore:
-                  - main
-                  - master
+            branches:
+              ignore:
+                - main
+                - master
       - test:
           requires:
-              - lint
+            - lint
           filters:
             branches:
               ignore:
