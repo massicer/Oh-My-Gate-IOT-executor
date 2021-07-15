@@ -1,17 +1,7 @@
+-include /shared/Makefile
+
 BUILDX_PLATFORMS = linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
 REPO_IMAGE = massicer/oh-my-gate-iot-executor
-
-.PHONY: lint
-lint:
-	golangci-lint run
-
-.PHONY: test-coverage
-test-coverage:
-	go test ./... -test.v -coverprofile cp.out
-
-.PHONY: test
-test:
-	go test ./... -test.v
 
 .PHONY: start
 start:

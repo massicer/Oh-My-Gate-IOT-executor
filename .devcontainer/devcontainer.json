@@ -1,6 +1,6 @@
 {
     "build": {
-        "dockerfile": "Dockerfile",
+        "dockerfile": "massicer/golang_ci:latest",
     },
     "runArgs": [
         "--env-file",
